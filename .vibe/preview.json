@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "stack": "os",
+  "toolchain": "native",
+  "previewKind": "none",
+  "packageManager": null,
+  "installCommand": null,
+  "buildCommand": null,
+  "devCommand": null,
+  "previewCommand": null,
+  "previewPort": 3000,
+  "healthCheckPath": "/",
+  "testCommand": null,
+  "runCommand": null
+}
