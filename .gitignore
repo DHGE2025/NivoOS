@@ -1,0 +1,11 @@
+/build/
+/target/
+**/bin/
+**/obj/
+.vs/
+__pycache__/
+*.pyc
+.env
+.env.*
+.cache/
+.pytest_cache/

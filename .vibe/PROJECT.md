@@ -1,42 +1,37 @@
-# Nivo OS: project guide for agents
+# Nivo OS: project guide
 
-VibeYourFlow gives this file to every agent step automatically. Keep it short and true; update it
-when the project changes. Kind: Operating system. Stack: C# mit dem Cosmos OS Development Kit. Wir entwickeln ein eigenes bootfähiges Betriebssystem mit einer minimalistischen, Apple-inspirierten Benutzeroberfläche..
+## Stack and status
 
-Sandbox: Linux with the `native` toolchain (C and C++ (GCC, Clang, CMake), Go, Rust, Python with uv, Zig, QEMU, GRUB and the ARM embedded compiler).
-No root, no Docker, no system packages. Only the install command has network access; build,
-tests and the program run offline, and a dependency you add is available after the next install
-step.
+Target: C# with Cosmos OS Development Kit. Current executable sandbox prototype:
+freestanding C11 / GNU assembly, x86 BIOS Multiboot via GRUB, VGA text desktop.
+`cosmos/Kernel.cs` is an uncompiled Cosmos kernel draft; it is not part of the
+native build. .NET and Cosmos are unavailable here. Cosmos project integration,
+graphical rendering, keyboard/mouse input and working dock applications remain open.
 
-## Run contract (never break this)
+## Run contract
 
-The project must always build, pass its tests and run in the VibeYourFlow sandbox. How is defined
-in `.vibe/preview.json`, which is the source of truth (workspace settings in the app override it).
-Nothing is served over HTTP: the output of the run command shows in the run log.
+`.vibe/preview.json` is the command source of truth. Native toolchain, no HTTP.
+No dependencies to fetch; all commands work offline with supplied tools.
 
-- Install: nothing to install
-- Build: none
-- Run: not set yet
+- Install: null
+- Build: `make all`
+- Test: `make test`
+- Run: `make run`
 
-No program exists yet. As soon as you create one, fill in `.vibe/preview.json` (install, build,
-test and run command) in the same change.
+Build generates `build/kernel.elf` and `build/nivo.iso`. Run boots the ISO with
+headless QEMU, validates serial markers and debug-exit status, and finishes
+within a 15-second subprocess timeout. Do not turn it into an interactive run.
 
-Rules:
+## Layout and conventions
 
-1. After any change that affects how the project builds or runs (build files, dependencies, entry
-   point), run the build and the run command before you finish. A change that breaks them is not
-   done.
-2. The run command finishes on its own: no interactive input, no server and no window that waits.
-   Give long runs a time limit (for example `timeout 120 qemu-system-x86_64 ...`).
-3. If you change a command, update `.vibe/preview.json` in the same change.
-4. Never commit build output, caches or `.env` files; keep `.gitignore` up to date.
+- `src/`: small C kernel, Multiboot entry, linker script and pure desktop renderer.
+- `cosmos/`: C# Cosmos draft, to integrate using a supported Cosmos template.
+- `scripts/run.py`: Python standard-library QEMU runner.
+- `tests/`: native C assertions and Python unittest; `make test` also boots the ISO.
+- `build/`: generated output only; ignored together with caches and .env files.
 
-## Tests
-
-Every change ships its tests, written by you in the same change; follow `.vibe/tests/README.md`.
-No test command yet: the first change with code sets one up as `.vibe/tests/README.md` describes.
-
-## Conventions
-
-- Keep changes small and focused; follow the patterns already in the code.
-- Put project-specific rules here (naming, folder layout, libraries to prefer or avoid).
+Keep the renderer independent from hardware so tests can inspect VGA cells.
+Use compiler warnings as errors. Do not add runtime dependencies unnecessarily.
+Test normal behavior, boundaries and failure cases; see `.vibe/tests/README.md`.
+After build/run command changes update preview.json and execute build, tests and
+bounded run. Do not claim the C# draft is tested until Cosmos actually builds it.
