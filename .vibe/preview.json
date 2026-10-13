@@ -5,11 +5,11 @@
   "previewKind": "none",
   "packageManager": null,
   "installCommand": null,
-  "buildCommand": null,
+  "buildCommand": "make all",
   "devCommand": null,
   "previewCommand": null,
   "previewPort": 3000,
   "healthCheckPath": "/",
-  "testCommand": null,
-  "runCommand": null
+  "testCommand": "make test",
+  "runCommand": "make run"
 }
