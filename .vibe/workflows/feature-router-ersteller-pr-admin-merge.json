@@ -1,0 +1,568 @@
+{
+  "version": 1,
+  "name": "Feature (Router, Ersteller → PR → Admin-Merge)",
+  "description": "Plan → Model-Router (Opus/Sonnet) je Agent-Schritt → Umsetzung, Tests, Fix, Review, Fix, finaler Test → Freigabe Ersteller → Pull Request → Freigabe Admin → Merge.",
+  "graph": {
+    "nodes": [
+      {
+        "id": "input",
+        "type": "INPUT",
+        "position": {
+          "x": 80,
+          "y": 160
+        },
+        "name": "Task",
+        "enabled": true,
+        "config": {
+          "variables": [
+            {
+              "id": "default_model",
+              "name": "default_model",
+              "type": "ai_model",
+              "required": false,
+              "description": "The AI model the agent steps use. Starts with the project’s standard AI.",
+              "defaultValue": ""
+            }
+          ]
+        }
+      },
+      {
+        "id": "planner",
+        "type": "PLANNER_AGENT",
+        "position": {
+          "x": 360,
+          "y": 160
+        },
+        "name": "Planner",
+        "enabled": true,
+        "config": {
+          "model": null,
+          "context": {
+            "maxFiles": 50,
+            "includePlan": true,
+            "excludeGlobs": [],
+            "includeGlobs": [],
+            "includePreviousResults": true
+          },
+          "provider": "mock",
+          "fallbackOn": [
+            "rate_limited",
+            "unavailable",
+            "timeout"
+          ],
+          "suggestFrom": [],
+          "connectionId": null,
+          "fallbackModel": null,
+          "modelSelection": "fixed",
+          "promptTemplate": "",
+          "fallbackProvider": null,
+          "permissionProfile": "read_only",
+          "generateBranchName": true,
+          "maxExecutionMinutes": 30,
+          "fallbackConnectionId": null
+        }
+      },
+      {
+        "id": "install_before_implement",
+        "type": "COMMAND",
+        "position": {
+          "x": 640,
+          "y": 160
+        },
+        "name": "Install dependencies",
+        "enabled": true,
+        "config": {
+          "argv": null,
+          "shell": null,
+          "network": "egress",
+          "timeoutSec": 900,
+          "allowFailure": true,
+          "projectCommand": "install"
+        }
+      },
+      {
+        "id": "implement",
+        "type": "AGENT",
+        "position": {
+          "x": 920,
+          "y": 160
+        },
+        "name": "Implementation",
+        "enabled": true,
+        "config": {
+          "mode": "implementation",
+          "model": null,
+          "context": {
+            "maxFiles": 50,
+            "includePlan": true,
+            "excludeGlobs": [],
+            "includeGlobs": [],
+            "includePreviousResults": true
+          },
+          "provider": "mock",
+          "fallbackOn": [
+            "rate_limited",
+            "unavailable",
+            "timeout"
+          ],
+          "promptStyle": "platform",
+          "connectionId": null,
+          "outputFields": [],
+          "testPlatform": "web",
+          "fallbackModel": null,
+          "modelSelection": "fixed",
+          "promptTemplate": "",
+          "fallbackProvider": null,
+          "permissionProfile": "workspace_write_commands",
+          "maxExecutionMinutes": 30,
+          "fallbackConnectionId": null
+        }
+      },
+      {
+        "id": "install",
+        "type": "COMMAND",
+        "position": {
+          "x": 1200,
+          "y": 160
+        },
+        "name": "Install dependencies",
+        "enabled": true,
+        "config": {
+          "argv": null,
+          "shell": null,
+          "network": "egress",
+          "timeoutSec": 900,
+          "allowFailure": true,
+          "projectCommand": "install"
+        }
+      },
+      {
+        "id": "tests",
+        "type": "TEST",
+        "position": {
+          "x": 1480,
+          "y": 160
+        },
+        "name": "Tests",
+        "enabled": true,
+        "config": {
+          "mode": "command",
+          "command": null,
+          "network": "none",
+          "allTests": false,
+          "platform": "web",
+          "timeoutSec": 600,
+          "failOnError": false,
+          "failOnNoTests": false
+        }
+      },
+      {
+        "id": "fix_tests",
+        "type": "AGENT",
+        "position": {
+          "x": 1760,
+          "y": 160
+        },
+        "name": "Fix failing tests",
+        "enabled": true,
+        "config": {
+          "mode": "fix",
+          "model": null,
+          "context": {
+            "maxFiles": 50,
+            "includePlan": true,
+            "excludeGlobs": [],
+            "includeGlobs": [],
+            "includePreviousResults": true
+          },
+          "provider": "mock",
+          "fallbackOn": [
+            "rate_limited",
+            "unavailable",
+            "timeout"
+          ],
+          "promptStyle": "platform",
+          "connectionId": null,
+          "outputFields": [],
+          "testPlatform": "web",
+          "fallbackModel": null,
+          "modelSelection": "fixed",
+          "promptTemplate": "",
+          "fallbackProvider": null,
+          "permissionProfile": "workspace_write_commands",
+          "maxExecutionMinutes": 30,
+          "fallbackConnectionId": null
+        }
+      },
+      {
+        "id": "install_before_tests_recheck",
+        "type": "COMMAND",
+        "position": {
+          "x": 2040,
+          "y": 160
+        },
+        "name": "Install dependencies",
+        "enabled": true,
+        "config": {
+          "argv": null,
+          "shell": null,
+          "network": "egress",
+          "timeoutSec": 900,
+          "allowFailure": true,
+          "projectCommand": "install"
+        }
+      },
+      {
+        "id": "tests_recheck",
+        "type": "TEST",
+        "position": {
+          "x": 2320,
+          "y": 160
+        },
+        "name": "Tests (re-check)",
+        "enabled": true,
+        "config": {
+          "mode": "command",
+          "command": null,
+          "network": "none",
+          "allTests": false,
+          "platform": "web",
+          "timeoutSec": 600,
+          "failOnError": false,
+          "failOnNoTests": false
+        }
+      },
+      {
+        "id": "review",
+        "type": "AGENT",
+        "position": {
+          "x": 2600,
+          "y": 160
+        },
+        "name": "Review",
+        "enabled": true,
+        "config": {
+          "mode": "review",
+          "model": null,
+          "context": {
+            "maxFiles": 50,
+            "includePlan": true,
+            "excludeGlobs": [],
+            "includeGlobs": [],
+            "includePreviousResults": true
+          },
+          "provider": "mock",
+          "fallbackOn": [
+            "rate_limited",
+            "unavailable",
+            "timeout"
+          ],
+          "promptStyle": "platform",
+          "connectionId": null,
+          "outputFields": [],
+          "testPlatform": "web",
+          "fallbackModel": null,
+          "modelSelection": "fixed",
+          "promptTemplate": "",
+          "fallbackProvider": null,
+          "permissionProfile": "read_only",
+          "maxExecutionMinutes": 30,
+          "fallbackConnectionId": null
+        }
+      },
+      {
+        "id": "fix_review",
+        "type": "AGENT",
+        "position": {
+          "x": 2880,
+          "y": 160
+        },
+        "name": "Fix review findings",
+        "enabled": true,
+        "config": {
+          "mode": "fix",
+          "model": null,
+          "context": {
+            "maxFiles": 50,
+            "includePlan": true,
+            "excludeGlobs": [],
+            "includeGlobs": [],
+            "includePreviousResults": true
+          },
+          "provider": "mock",
+          "fallbackOn": [
+            "rate_limited",
+            "unavailable",
+            "timeout"
+          ],
+          "promptStyle": "platform",
+          "connectionId": null,
+          "outputFields": [],
+          "testPlatform": "web",
+          "fallbackModel": null,
+          "modelSelection": "fixed",
+          "promptTemplate": "",
+          "fallbackProvider": null,
+          "permissionProfile": "workspace_write_commands",
+          "maxExecutionMinutes": 30,
+          "fallbackConnectionId": null
+        }
+      },
+      {
+        "id": "install_before_tests_final",
+        "type": "COMMAND",
+        "position": {
+          "x": 3160,
+          "y": 160
+        },
+        "name": "Install dependencies",
+        "enabled": true,
+        "config": {
+          "argv": null,
+          "shell": null,
+          "network": "egress",
+          "timeoutSec": 900,
+          "allowFailure": true,
+          "projectCommand": "install"
+        }
+      },
+      {
+        "id": "tests_final",
+        "type": "TEST",
+        "position": {
+          "x": 3440,
+          "y": 160
+        },
+        "name": "Tests (final gate)",
+        "enabled": true,
+        "config": {
+          "mode": "command",
+          "command": null,
+          "network": "none",
+          "allTests": false,
+          "platform": "web",
+          "timeoutSec": 600,
+          "failOnError": true,
+          "failOnNoTests": false
+        }
+      },
+      {
+        "id": "approval",
+        "type": "APPROVAL",
+        "position": {
+          "x": 3720,
+          "y": 160
+        },
+        "name": "Approval",
+        "enabled": true,
+        "config": {
+          "policy": "project",
+          "prompt": "Review the result and decide whether to continue.",
+          "timeoutHours": null
+        }
+      },
+      {
+        "id": "pr",
+        "type": "CREATE_PULL_REQUEST",
+        "position": {
+          "x": 4000,
+          "y": 160
+        },
+        "name": "Pull request",
+        "enabled": true,
+        "config": {
+          "draft": false,
+          "baseBranch": null,
+          "bodyTemplate": "",
+          "titleTemplate": "{task}",
+          "updateTriggerPullRequest": false
+        }
+      },
+      {
+        "id": "output",
+        "type": "OUTPUT",
+        "position": {
+          "x": 4280,
+          "y": 160
+        },
+        "name": "Run report",
+        "enabled": true,
+        "config": {
+          "release": false,
+          "includeDiffArtifact": true
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-input-planner",
+        "source": "input",
+        "sourceHandle": null,
+        "target": "planner",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-planner-install_before_implement",
+        "source": "planner",
+        "sourceHandle": null,
+        "target": "install_before_implement",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-install_before_implement-implement",
+        "source": "install_before_implement",
+        "sourceHandle": null,
+        "target": "implement",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-implement-install",
+        "source": "implement",
+        "sourceHandle": null,
+        "target": "install",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-install-tests",
+        "source": "install",
+        "sourceHandle": null,
+        "target": "tests",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-tests-fix_tests",
+        "source": "tests",
+        "sourceHandle": null,
+        "target": "fix_tests",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-fix_tests-install_before_tests_recheck",
+        "source": "fix_tests",
+        "sourceHandle": null,
+        "target": "install_before_tests_recheck",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-install_before_tests_recheck-tests_recheck",
+        "source": "install_before_tests_recheck",
+        "sourceHandle": null,
+        "target": "tests_recheck",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-tests_recheck-review",
+        "source": "tests_recheck",
+        "sourceHandle": null,
+        "target": "review",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-review-fix_review",
+        "source": "review",
+        "sourceHandle": null,
+        "target": "fix_review",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-fix_review-install_before_tests_final",
+        "source": "fix_review",
+        "sourceHandle": null,
+        "target": "install_before_tests_final",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-install_before_tests_final-tests_final",
+        "source": "install_before_tests_final",
+        "sourceHandle": null,
+        "target": "tests_final",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-tests_final-approval",
+        "source": "tests_final",
+        "sourceHandle": null,
+        "target": "approval",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-approval-pr",
+        "source": "approval",
+        "sourceHandle": null,
+        "target": "pr",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-pr-output",
+        "source": "pr",
+        "sourceHandle": null,
+        "target": "output",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "d-input-default_model-planner",
+        "source": "input",
+        "sourceHandle": "out:var:default_model",
+        "target": "planner",
+        "targetHandle": "in:model",
+        "condition": "on_success"
+      },
+      {
+        "id": "d-input-default_model-implement",
+        "source": "input",
+        "sourceHandle": "out:var:default_model",
+        "target": "implement",
+        "targetHandle": "in:model",
+        "condition": "on_success"
+      },
+      {
+        "id": "d-input-default_model-fix_tests",
+        "source": "input",
+        "sourceHandle": "out:var:default_model",
+        "target": "fix_tests",
+        "targetHandle": "in:model",
+        "condition": "on_success"
+      },
+      {
+        "id": "d-input-default_model-review",
+        "source": "input",
+        "sourceHandle": "out:var:default_model",
+        "target": "review",
+        "targetHandle": "in:model",
+        "condition": "on_success"
+      },
+      {
+        "id": "d-input-default_model-fix_review",
+        "source": "input",
+        "sourceHandle": "out:var:default_model",
+        "target": "fix_review",
+        "targetHandle": "in:model",
+        "condition": "on_success"
+      }
+    ],
+    "settings": {
+      "maxParallelNodes": 4,
+      "maxDurationMinutes": 120,
+      "maxRetries": 3,
+      "branchNaming": {
+        "category": "feature",
+        "prefix": "vibeyourflow"
+      }
+    }
+  }
+}

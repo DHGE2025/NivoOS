@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "name": "Product readiness analysis",
+  "description": "A read-only agent reads the repository and reports what exists, what is missing for an MVP and for production, risks, quality gaps and prioritized next steps with evidence. The result appears on the project overview; nothing is changed.",
+  "graph": {
+    "nodes": [
+      {
+        "id": "input",
+        "type": "INPUT",
+        "position": {
+          "x": 80,
+          "y": 160
+        },
+        "name": "Task",
+        "enabled": true,
+        "config": {
+          "variables": [
+            {
+              "id": "default_model",
+              "name": "default_model",
+              "type": "ai_model",
+              "required": false,
+              "description": "The AI model the agent steps use. Starts with the project’s standard AI.",
+              "defaultValue": ""
+            }
+          ]
+        }
+      },
+      {
+        "id": "analysis",
+        "type": "AGENT",
+        "position": {
+          "x": 360,
+          "y": 160
+        },
+        "name": "Product analysis",
+        "enabled": true,
+        "config": {
+          "mode": "analysis",
+          "model": null,
+          "context": {
+            "maxFiles": 50,
+            "includePlan": true,
+            "excludeGlobs": [],
+            "includeGlobs": [],
+            "includePreviousResults": true
+          },
+          "provider": "mock",
+          "fallbackOn": [
+            "rate_limited",
+            "unavailable",
+            "timeout"
+          ],
+          "promptStyle": "platform",
+          "connectionId": null,
+          "outputFields": [],
+          "testPlatform": "web",
+          "fallbackModel": null,
+          "modelSelection": "fixed",
+          "promptTemplate": "Analyze this repository as a product, not as a code review. Read the real files (manifests, entry points, routes, screens or commands, data layer, tests, docs, CI, .vibe/) before judging anything. Establish, each with file (and line where possible) as evidence and marked \"detected\" (seen in a file), \"inferred\" (concluded from what you saw) or \"unknown\" (could not tell):\n- what is already implemented and which core features are recognizable\n- whether the project builds and can be started, previewed or run as it is\n- which tests, quality checks and documentation exist\n- whether authentication and authorization exist, if the product needs them\n- which persistence, API or integration layers exist\n- which error and empty states are missing\n- which accessibility or responsive problems are visible, if it has a user interface\n- what is missing for a usable MVP and for realistic production operation\n- which assumptions are uncertain and need the user's confirmation\n\nNever claim the application is complete or secure because you found no problem; list what you did not look at under limitations.\n\nSubmit the result with a \"productAnalysis\" object of this shape (every list may be empty):\n{ \"version\": 1, \"summary\": string, \"productType\": string,\n  \"runnable\": { \"status\": \"ready\"|\"needs_attention\"|\"not_checked\"|\"blocked\", \"note\": string },\n  \"implemented\": [{ \"text\": string, \"confidence\": \"detected\"|\"inferred\"|\"unknown\", \"evidence\": [{ \"file\": string, \"line\": number|null }] }],\n  \"missing\": [...same shape...], \"technicalRisks\": [...], \"qualityGaps\": [...],\n  \"recommendations\": [{ \"id\": \"short-slug\", \"title\": string, \"description\": string, \"priority\": \"critical\"|\"high\"|\"medium\"|\"low\", \"confidence\": ..., \"evidence\": [...], \"buildPrompt\": \"a self-contained task a coding agent can implement\" }],\n  \"openQuestions\": [string], \"limitations\": [string] }\nPut the same content, readable, in \"summary\". Order recommendations by priority.",
+          "fallbackProvider": null,
+          "permissionProfile": "read_only",
+          "maxExecutionMinutes": 30,
+          "fallbackConnectionId": null
+        }
+      },
+      {
+        "id": "output",
+        "type": "OUTPUT",
+        "position": {
+          "x": 640,
+          "y": 160
+        },
+        "name": "Run report",
+        "enabled": true,
+        "config": {
+          "release": false,
+          "includeDiffArtifact": true
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-input-analysis",
+        "source": "input",
+        "sourceHandle": null,
+        "target": "analysis",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-analysis-output",
+        "source": "analysis",
+        "sourceHandle": null,
+        "target": "output",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "d-input-default_model-analysis",
+        "source": "input",
+        "sourceHandle": "out:var:default_model",
+        "target": "analysis",
+        "targetHandle": "in:model",
+        "condition": "on_success"
+      }
+    ],
+    "settings": {
+      "maxParallelNodes": 4,
+      "maxDurationMinutes": 120,
+      "maxRetries": 3,
+      "branchNaming": {
+        "category": "feature",
+        "prefix": "vibeyourflow"
+      }
+    }
+  }
+}
