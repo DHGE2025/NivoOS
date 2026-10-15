@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "name": "Release-Check",
+  "description": "Vor einem Release: Build, Tests und QEMU-Boot pruefen, ohne etwas zu aendern.",
+  "graph": {
+    "nodes": [
+      {
+        "id": "input",
+        "type": "INPUT",
+        "position": {
+          "x": 80,
+          "y": 160
+        },
+        "name": "Task",
+        "enabled": true,
+        "config": {
+          "variables": []
+        }
+      },
+      {
+        "id": "install",
+        "type": "COMMAND",
+        "position": {
+          "x": 360,
+          "y": 160
+        },
+        "name": "Install dependencies",
+        "enabled": true,
+        "config": {
+          "argv": null,
+          "shell": null,
+          "network": "egress",
+          "timeoutSec": 900,
+          "allowFailure": false,
+          "projectCommand": "install"
+        }
+      },
+      {
+        "id": "build",
+        "type": "COMMAND",
+        "position": {
+          "x": 640,
+          "y": 160
+        },
+        "name": "Production build",
+        "enabled": true,
+        "config": {
+          "argv": null,
+          "shell": null,
+          "network": "none",
+          "timeoutSec": 900,
+          "allowFailure": false,
+          "projectCommand": "build"
+        }
+      },
+      {
+        "id": "tests",
+        "type": "TEST",
+        "position": {
+          "x": 920,
+          "y": 160
+        },
+        "name": "Tests",
+        "enabled": true,
+        "config": {
+          "mode": "command",
+          "command": null,
+          "network": "none",
+          "allTests": false,
+          "platform": "web",
+          "timeoutSec": 600,
+          "failOnError": true,
+          "failOnNoTests": false
+        }
+      },
+      {
+        "id": "run",
+        "type": "COMMAND",
+        "position": {
+          "x": 1200,
+          "y": 160
+        },
+        "name": "Run the program",
+        "enabled": true,
+        "config": {
+          "argv": null,
+          "shell": null,
+          "network": "none",
+          "timeoutSec": 300,
+          "allowFailure": false,
+          "projectCommand": "run"
+        }
+      },
+      {
+        "id": "output",
+        "type": "OUTPUT",
+        "position": {
+          "x": 1480,
+          "y": 160
+        },
+        "name": "Release report",
+        "enabled": true,
+        "config": {
+          "release": true,
+          "includeDiffArtifact": false
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-input-install",
+        "source": "input",
+        "sourceHandle": null,
+        "target": "install",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-install-build",
+        "source": "install",
+        "sourceHandle": null,
+        "target": "build",
+        "targetHandle": null,
+        "condition": "always"
+      },
+      {
+        "id": "e-build-tests",
+        "source": "build",
+        "sourceHandle": null,
+        "target": "tests",
+        "targetHandle": null,
+        "condition": "always"
+      },
+      {
+        "id": "e-tests-run",
+        "source": "tests",
+        "sourceHandle": null,
+        "target": "run",
+        "targetHandle": null,
+        "condition": "always"
+      },
+      {
+        "id": "e-run-output",
+        "source": "run",
+        "sourceHandle": null,
+        "target": "output",
+        "targetHandle": null,
+        "condition": "always"
+      }
+    ],
+    "settings": {
+      "maxParallelNodes": 4,
+      "maxDurationMinutes": 120,
+      "maxRetries": 3,
+      "branchNaming": {
+        "category": "feature",
+        "prefix": "vibeyourflow"
+      }
+    }
+  }
+}

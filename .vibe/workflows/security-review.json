@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "name": "Security review",
+  "description": "An analysis agent looks for common security problems, followed by a review. This is an AI-assisted review, not a complete security scanner.",
+  "graph": {
+    "nodes": [
+      {
+        "id": "input",
+        "type": "INPUT",
+        "position": {
+          "x": 80,
+          "y": 160
+        },
+        "name": "Task",
+        "enabled": true,
+        "config": {
+          "variables": [
+            {
+              "id": "default_model",
+              "name": "default_model",
+              "type": "ai_model",
+              "required": false,
+              "description": "The AI model the agent steps use. Starts with the project’s standard AI.",
+              "defaultValue": ""
+            }
+          ]
+        }
+      },
+      {
+        "id": "security",
+        "type": "AGENT",
+        "position": {
+          "x": 360,
+          "y": 160
+        },
+        "name": "Security analysis",
+        "enabled": true,
+        "config": {
+          "mode": "analysis",
+          "model": null,
+          "context": {
+            "maxFiles": 50,
+            "includePlan": true,
+            "excludeGlobs": [],
+            "includeGlobs": [],
+            "includePreviousResults": true
+          },
+          "provider": "mock",
+          "fallbackOn": [
+            "rate_limited",
+            "unavailable",
+            "timeout"
+          ],
+          "promptStyle": "platform",
+          "connectionId": null,
+          "outputFields": [],
+          "testPlatform": "web",
+          "fallbackModel": null,
+          "modelSelection": "fixed",
+          "promptTemplate": "Review the repository for common security problems (injection, unsafe deserialization, secrets in code, missing authorization checks, vulnerable dependency usage). Report concrete findings with file and line. Do not claim completeness.",
+          "fallbackProvider": null,
+          "permissionProfile": "read_only",
+          "maxExecutionMinutes": 30,
+          "fallbackConnectionId": null
+        }
+      },
+      {
+        "id": "review",
+        "type": "AGENT",
+        "position": {
+          "x": 640,
+          "y": 160
+        },
+        "name": "Review",
+        "enabled": true,
+        "config": {
+          "mode": "review",
+          "model": null,
+          "context": {
+            "maxFiles": 50,
+            "includePlan": true,
+            "excludeGlobs": [],
+            "includeGlobs": [],
+            "includePreviousResults": true
+          },
+          "provider": "mock",
+          "fallbackOn": [
+            "rate_limited",
+            "unavailable",
+            "timeout"
+          ],
+          "promptStyle": "platform",
+          "connectionId": null,
+          "outputFields": [],
+          "testPlatform": "web",
+          "fallbackModel": null,
+          "modelSelection": "fixed",
+          "promptTemplate": "",
+          "fallbackProvider": null,
+          "permissionProfile": "read_only",
+          "maxExecutionMinutes": 30,
+          "fallbackConnectionId": null
+        }
+      },
+      {
+        "id": "output",
+        "type": "OUTPUT",
+        "position": {
+          "x": 920,
+          "y": 160
+        },
+        "name": "Run report",
+        "enabled": true,
+        "config": {
+          "release": false,
+          "includeDiffArtifact": true
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-input-security",
+        "source": "input",
+        "sourceHandle": null,
+        "target": "security",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-security-review",
+        "source": "security",
+        "sourceHandle": null,
+        "target": "review",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "e-review-output",
+        "source": "review",
+        "sourceHandle": null,
+        "target": "output",
+        "targetHandle": null,
+        "condition": "on_success"
+      },
+      {
+        "id": "d-input-default_model-security",
+        "source": "input",
+        "sourceHandle": "out:var:default_model",
+        "target": "security",
+        "targetHandle": "in:model",
+        "condition": "on_success"
+      },
+      {
+        "id": "d-input-default_model-review",
+        "source": "input",
+        "sourceHandle": "out:var:default_model",
+        "target": "review",
+        "targetHandle": "in:model",
+        "condition": "on_success"
+      }
+    ],
+    "settings": {
+      "maxParallelNodes": 4,
+      "maxDurationMinutes": 120,
+      "maxRetries": 3,
+      "branchNaming": {
+        "category": "feature",
+        "prefix": "vibeyourflow"
+      }
+    }
+  }
+}
